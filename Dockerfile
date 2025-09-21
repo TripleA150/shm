@@ -69,6 +69,7 @@ COPY entry-core.sh /entry.sh
 CMD ["/entry.sh"]
 
 COPY app /app
+RUN find /app -name "*.cgi" -exec chmod +x {} \;
 
 
 FROM httpd:2.4 AS webdav
@@ -76,4 +77,3 @@ EXPOSE 80
 RUN mkdir -p /app/data && \
     ln -s /app/data /usr/local/apache2/webdav
 COPY build/webdav/httpd.conf /usr/local/apache2/conf/httpd.conf
-
