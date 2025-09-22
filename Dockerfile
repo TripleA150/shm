@@ -45,7 +45,10 @@ RUN apt-get install -y \
     librouter-simple-perl \
     libcryptx-perl \
     libbytes-random-secure-perl \
-    libcrypt-jwt-perl
+    libcrypt-jwt-perl \
+    openssl \
+    libcrypt-openssl-rsa-perl \
+    libcrypt-openssl-x509-perl
 
 RUN cpan Crypt::Curve25519
 
