@@ -54,7 +54,7 @@ if ( $vars{action} eq 'create' ) {
 
     my $browser = LWP::UserAgent->new( timeout => 10 );
 
-    my $req = HTTP::Request->new( POST => "https://api-sandbox.wata.pro/api/h2h/links" );
+    my $req = HTTP::Request->new( POST => "https://api.wata.pro/api/h2h/links" );
     $req->header('Content-type' => 'application/json');
     $req->header('Authorization' => "Bearer $api_key");
     $req->header('User-Agent' => 'SHM');
@@ -213,7 +213,7 @@ sub get_wata_public_key {
     }
     
     my $browser = LWP::UserAgent->new(timeout => 10);
-    my $response = $browser->get('https://api-sandbox.wata.pro/api/h2h/public-key');
+    my $response = $browser->get('https://api.wata.pro/api/h2h/public-key');
     
     if ($response->is_success) {
         my $data = decode_json($response->decoded_content);
