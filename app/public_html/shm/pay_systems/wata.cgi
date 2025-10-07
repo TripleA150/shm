@@ -34,7 +34,7 @@ if ( $vars{action} eq 'create' ) {
 
     my $config = get_service('config', _id => 'pay_systems');
     my $api_key = $config->get_data->{wata}->{api_key};
-    my $currency = $config->get_data->{wata}->{currency} || 'RUB';
+    my $currency = $config->get_data->{wata}->{currency} || 'USD';
     my $description = $config->get_data->{wata}->{description};
     my $return_url = $config->get_data->{wata}->{return_url};
 
@@ -192,7 +192,7 @@ eval {
         uniq_key => $webhook_data->{transactionId},
     );
     $user->commit;
-    # logger->info("💰 Payment successful for user [$user_id], amount: $amount RUB");
+    # logger->info("💰 Payment successful for user [$user_id], amount: $amount USD");
 };
 if ($@) {
     logger->error("❌ Failed to process payment for user [$user_id]: $@");
