@@ -50,7 +50,7 @@ if ( $vars{action} eq 'create' ) {
         exit 0;
     }
 
-    $vars{amount} ||= 100;
+    $vars{amount} ||= 10;
 
     my $browser = LWP::UserAgent->new( timeout => 10 );
 
@@ -155,7 +155,22 @@ unless ($webhook_data->{transactionStatus} && $webhook_data->{transactionStatus}
 }
 
 my $user_id = $webhook_data->{orderId};
+my $request_currency = $webhook_data->{currency};
 my $amount = $webhook_data->{amount};
+my $commission = $webhook_data->{commission};
+
+my $amount_in_rub;
+    if ($request_currency eq 'RUB') {
+        $amount_in_rub = $amount;
+    }
+    else {
+        my $rate = get_usd_to_rub_rate();
+        unless ($rate) {
+            print_json({ status => 500, msg => 'Failed to get USD/RUB rate' });
+            exit 0;
+        }
+        $amount_in_rub = int(($amount - $commission) * $rate);
+    }
 
 logger->info("🔍 Extracted orderId: [$user_id] (type: " . ref($user_id) . ")");
 
@@ -186,7 +201,7 @@ unless ( $user->lock( timeout => 10 )) {
 eval {
     $user->payment(
         user_id => $user_id,
-        money => $amount,
+        money => $amount_in_rub,
         pay_system_id => 'wata',
         comment => $webhook_data,
         uniq_key => $webhook_data->{transactionId},
@@ -257,4 +272,23 @@ sub verify_rsa_signature {
     }
     
     return $is_valid ? 1 : 0;
+}
+
+sub get_usd_to_rub_rate {
+    my $browser = LWP::UserAgent->new(
+        timeout => 10,
+        ssl_opts => { verify_hostname => 0 },
+    );
+
+    my $url = "https://api.binance.com/api/v3/ticker/price";
+    my $resp = $browser->get($url);
+
+    return undef unless $resp->is_success;
+
+    my $data = decode_json($resp->decoded_content);
+    for my $entry (@$data) {
+        return $entry->{price} if $entry->{symbol} eq 'USDTRUB';
+    }
+
+    return undef;
 }
